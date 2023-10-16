@@ -2,10 +2,10 @@
 File: CAN_Auth.py(校园网登录)
 Author: eya46
 Date: 2023/10/10 10:10
-cron: 12 2/5 * * * ?
+cron: 12 2/1 * * * ?
 new Env('校园网登录');
 Description:
-自动检测并登录校园网，每两分钟执行一次。
+自动检测并登录校园网，每一分钟执行一次。
 变量：CAN_ACCOUNT,CAN_PASSWORD,CAN_ENCRYPT(账号,密码,是否为加密的密码true/false)
 """
 from json import load, loads
