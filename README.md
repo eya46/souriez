@@ -19,3 +19,4 @@ ql repo https://ghproxy.com/https://github.com/eya46/souriez.git "" "__|notify.p
 
 - [登录校园网](CAN_Auth.py)
 - [自动注销校园网](CAN_Logout.py)
+- [DDNS](CAN_DDNS.py)
