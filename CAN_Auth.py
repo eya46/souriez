@@ -79,7 +79,12 @@ def login(account: str, password: str, encrypt: str = "false") -> Tuple[bool, st
         )
     ))
     if not userIndex:
-        userIndex = "userIndex=" + data.get("userIndex", "")
+        try:
+            userIndex = "userIndex=" + data.get("userIndex")
+        except Exception as e:
+            print("发生错误:", e)
+            print("返回数据:", data)
+            raise e
     return (
         data.get("result", "false") != "false",
         data.get("message", "无message返回") or "登录成功"
