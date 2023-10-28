@@ -51,44 +51,47 @@ def check_network() -> bool:
 
 def login(account: str, password: str, encrypt: str = "false") -> Tuple[bool, str]:
     global userIndex, query
-    if not query:
-        query = urlparse(
-            urlopen("http://10.2.10.19").read().decode("gbk").strip()
-            .replace("'</script>", "")
-            .replace("<script>top.self.location.href='", "")
-        ).query
-    data: dict = load(urlopen(
-        Request(
-            "http://10.2.10.19/eportal/InterFace.do?method=login",
-            headers={
-                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)" +
-                              " Chrome/117.0.0.0 Safari/537.36"
-            },
-            method="POST",
-            data=urlencode({
-                "userId": account,
-                "password": password,
-                "service": "联通网服务",
-                "queryString": quote(query),
-                "operatorPwd": "",
-                "operatorUserId": "",
-                "validcode": "",
-                "passwordEncrypt": encrypt  # 为true时需要RSA加密，网页登录抓包可以看到加密的密码
-            }).encode("utf-8")
+    try:
+        if not query:
+            query = urlparse(
+                urlopen("http://10.2.10.19").read().decode("gbk").strip()
+                .replace("'</script>", "")
+                .replace("<script>top.self.location.href='", "")
+            ).query
+        data: dict = load(urlopen(
+            Request(
+                "http://10.2.10.19/eportal/InterFace.do?method=login",
+                headers={
+                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)" +
+                                  " Chrome/117.0.0.0 Safari/537.36"
+                },
+                method="POST",
+                data=urlencode({
+                    "userId": account,
+                    "password": password,
+                    "service": "联通网服务",
+                    "queryString": quote(query),
+                    "operatorPwd": "",
+                    "operatorUserId": "",
+                    "validcode": "",
+                    "passwordEncrypt": encrypt  # 为true时需要RSA加密，网页登录抓包可以看到加密的密码
+                }).encode("utf-8")
+            )
+        ))
+        print("返回数据:", data)
+
+        if not userIndex:
+            userIndex = f'userIndex={data.get("userIndex", "")}'
+
+        return (
+            data.get("result", "false") == "success",
+            data.get("message", "无message返回") or "登录成功"
         )
-    ))
-    if not userIndex:
-        try:
-            userIndex = "userIndex=" + data.get("userIndex")
-        except Exception as e:
-            print("发生错误:", e)
-            print("返回数据:", data)
-            raise e
-    return (
-        data.get("result", "false") != "false",
-        data.get("message", "无message返回") or "登录成功"
-    )
+
+    except Exception as e:
+        print("发生错误:", e)
+        raise e
 
 
 def main():
@@ -117,14 +120,19 @@ def main():
         ).query
 
     res, msg = login(account, password, encrypt)
-    txt = (
-        f"认证结果:{res}\n消息:{msg}\n"
-        f"{get_login_info_txt()}"
-    )
-    print(txt)
-    print("-" * 20)
-    print("发送通知...")
-    send("校园网登录结果", txt)
+    if res:
+        txt = (
+            f"认证结果:{res}\n消息:{msg}\n"
+            f"{get_login_info_txt()}"
+        )
+        print(txt)
+        print("-" * 20)
+        print("发送通知...")
+        send("校园网登录结果", txt)
+    else:
+        print("登录失败:", msg)
+        print("-" * 20)
+        send("校园网登录结果", msg)
 
 
 main()
