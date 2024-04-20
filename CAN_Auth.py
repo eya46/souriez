@@ -25,9 +25,7 @@ def get_login_info() -> dict:
     return load(urlopen(Request(
         "http://10.2.10.19/eportal/InterFace.do?method=getOnlineUserInfo",
         method="POST"
-    ),
-        data=(userIndex or urlparse(urlopen("http://10.2.10.19").url).query).encode("utf-8")
-    ))
+    )))
 
 
 def get_login_info_txt() -> str:
@@ -38,6 +36,7 @@ def get_login_info_txt() -> str:
         f"--IP:{info['userIp']}\n"
         f"--MAC:{info['userMac']}\n"
         f"--Service:{info['service']}"
+        f"--notify:{info['notify']}"
     )
 
 
@@ -104,6 +103,9 @@ def main():
     encrypt = "true" if getenv("CAN_ENCRYPT") == "true" else "false"
 
     if check_network():
+        notify = get_login_info().get("")
+        if len(notify) > 5:
+            print(notify)
         return print("网络正常")
 
     print("网络异常，正在检查是否登录...")
@@ -120,6 +122,11 @@ def main():
         ).query
 
     res, msg = login(account, password, encrypt)
+    """
+    message可能的值:
+    1."您未绑定服务对应的运营商"
+    2.""
+    """
     if res:
         txt = (
             f"认证结果:{res}\n消息:{msg}\n"
