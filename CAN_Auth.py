@@ -108,6 +108,9 @@ def main():
             print("-" * 32)
             print(dumps(info, ensure_ascii=False))
             print("-" * 32)
+        if (notify := info.get("notify")) and "检测" in notify:
+            send("被检测到", notify)
+
         return print("网络正常")
 
     print("网络异常，正在检查是否登录...")
