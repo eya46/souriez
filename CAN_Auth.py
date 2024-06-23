@@ -8,7 +8,7 @@ Description:
 自动检测并登录校园网，每一分钟执行一次。
 变量：CAN_ACCOUNT,CAN_PASSWORD,CAN_ENCRYPT(账号,密码,是否为加密的密码true/false)
 """
-from json import load, loads
+from json import load, dumps
 from os import getenv
 from typing import Tuple
 from urllib.parse import quote, urlparse, urlencode
@@ -103,9 +103,11 @@ def main():
     encrypt = "true" if getenv("CAN_ENCRYPT") == "true" else "false"
 
     if check_network():
-        notify = get_login_info().get("")
-        if len(notify) > 5:
-            print(notify)
+        info = get_login_info()
+        if len(info.get("userIndex")) > 5:
+            print("-" * 32)
+            print(dumps(info, ensure_ascii=False))
+            print("-" * 32)
         return print("网络正常")
 
     print("网络异常，正在检查是否登录...")
