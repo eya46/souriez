@@ -8,7 +8,7 @@ Description:
 自动检测并登录校园网，每一分钟执行一次。
 变量：CAN_ACCOUNT,CAN_PASSWORD,CAN_ENCRYPT(账号,密码,是否为加密的密码true/false)
 """
-from json import load, dumps
+from json import load, dumps, loads
 from os import getenv
 from typing import Tuple
 from urllib.parse import quote, urlparse, urlencode
@@ -109,7 +109,7 @@ def main():
             print(dumps(info, ensure_ascii=False))
             print("-" * 32)
         if (notify := info.get("notify")) and "检测" in notify:
-            send("被检测到", notify)
+            send("被检测到", "\n".join(loads(notify)))
 
         return print("网络正常")
 
