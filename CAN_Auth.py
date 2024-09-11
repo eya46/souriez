@@ -48,7 +48,7 @@ def check_network() -> bool:
         return False
 
 
-def login(account: str, password: str, encrypt: str = "false") -> Tuple[bool, str]:
+def login(account: str, password: str, net_type: str, encrypt: str = "false") -> Tuple[bool, str]:
     global userIndex, query
     try:
         if not query:
@@ -69,7 +69,7 @@ def login(account: str, password: str, encrypt: str = "false") -> Tuple[bool, st
                 data=urlencode({
                     "userId": account,
                     "password": password,
-                    "service": "联通网服务",
+                    "service": net_type,
                     "queryString": quote(query),
                     "operatorPwd": "",
                     "operatorUserId": "",
@@ -99,6 +99,9 @@ def main():
         return print("未设置账号:CAN_ACCOUNT")
     if not (password := getenv("CAN_PASSWORD")):
         return print("未设置密码:CAN_PASSWORD")
+    if not (net_type := getenv("CAN_NET_TYPE")):
+        # 联通网服务/校园网服务
+        return print("未设置网络类型:CAN_NET_TYPE")
     # 是否为加密的密码
     encrypt = "true" if getenv("CAN_ENCRYPT") == "true" else "false"
 
@@ -127,11 +130,11 @@ def main():
             .replace("<script>top.self.location.href='", "")
         ).query
 
-    res, msg = login(account, password, encrypt)
+    res, msg = login(account, password, net_type, encrypt)
     """
     message可能的值:
     1."您未绑定服务对应的运营商"
-    2.""
+    2."欠费停机"
     """
     if res:
         txt = (
@@ -141,11 +144,11 @@ def main():
         print(txt)
         print("-" * 20)
         print("发送通知...")
-        send("校园网登录结果", txt)
+        send(f"{net_type} 登录结果", txt)
     else:
         print("登录失败:", msg)
         print("-" * 20)
-        send("校园网登录结果", msg)
+        send(f"{net_type} 登录结果", msg)
 
 
 main()
