@@ -8,6 +8,8 @@ Description:
 自动检测并登录校园网，每一分钟执行一次。
 变量：CAN_ACCOUNT,CAN_PASSWORD,CAN_ENCRYPT(账号,密码,是否为加密的密码true/false)
 """
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 from json import load, loads
 from os import getenv
 from typing import Tuple
@@ -42,8 +44,7 @@ def get_login_info_txt() -> str:
 
 def check_network() -> bool:
     try:
-        urlopen("https://www.baidu.com", timeout=2)
-        return True
+        return "10.2.10.19/eportal/index.jsp" not in urlopen("https://www.baidu.com", timeout=2).read().decode()
     except:
         return False
 
@@ -107,7 +108,7 @@ def main():
 
     if check_network():
         info = get_login_info()
-        if len(info.get("userIndex")) > 5:
+        if len(info.get("userIndex","")) > 5:
             print("\n".join(loads(info.get("notify", "[]"))))
         #     print("-" * 32)
         #     print(dumps(info, ensure_ascii=False))
